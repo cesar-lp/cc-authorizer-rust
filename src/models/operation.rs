@@ -1,4 +1,4 @@
-use std::vec;
+use std::{fmt::Debug, vec};
 
 use serde::{Deserialize, Serialize};
 
@@ -14,7 +14,9 @@ pub struct TX {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FileOperation {
+    #[serde(rename = "account")]
     CreateAccount(Account),
+    #[serde(rename = "transaction")]
     ExecuteTX(TX),
     Invalid,
 }
@@ -38,6 +40,14 @@ impl Account {
     }
 
     pub fn execute_tx(&mut self, tx: TX) {}
+
+    pub fn to_invalid_state(&self, errors: Vec<OperationError>) -> AccountState {
+        AccountState::new(self.active_card, self.available_limit, errors)
+    }
+
+    pub fn to_state(&self) -> AccountState {
+        AccountState::new(self.active_card, self.available_limit, vec![])
+    }
 }
 
 #[derive(Debug)]
@@ -48,37 +58,40 @@ pub struct AccountState {
 }
 
 impl AccountState {
-    pub fn new(acc: &Account) -> Self {
+    pub fn new(active_card: bool, available_limit: u32, errors: Vec<OperationError>) -> Self {
         Self {
-            available_limit: acc.available_limit,
-            active_card: acc.active_card,
-            violations: vec![],
+            available_limit,
+            active_card,
+            violations: errors.iter().map(|e| e.to_string()).collect(),
         }
     }
 }
 
 #[derive(Debug)]
-pub struct OperationExecutor<'a> {
-    account: Option<&'a Account>,
+pub struct OperationExecutor {
+    account: Option<Account>,
 }
 
-impl <'a> OperationExecutor<'a> {
+impl OperationExecutor {
     pub fn new() -> Self {
         Self {
             account: Option::None,
         }
     }
 
-    pub fn create_account(&mut self, account: &'a Account) -> Result<AccountState, OperationError> {
+    pub fn create_account(&mut self, account: Account) -> AccountState {
         if self.account.is_some() {
-            return Err(OperationError::AccountAlreadyInitialized);
-        } else {
-            self.account = Option::Some(account);
-            Ok(AccountState::new(&account))
+            return account.to_invalid_state(vec![OperationError::AccountAlreadyInitialized]);
         }
+
+        let state = account.to_state();
+
+        self.account = Option::Some(account);
+
+        return state;
     }
 
-    pub fn register_tx(mut self, tx: TX) -> Result<AccountState, OperationError> {
+    pub fn register_tx(&mut self, tx: TX) -> AccountState {
         todo!()
     }
 }
