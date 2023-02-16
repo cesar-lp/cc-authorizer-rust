@@ -11,5 +11,7 @@ pub enum OperationError {
   #[error("high-frequency-small-interval")]
   HighFrequencySmallInterval(String, String),
   #[error("duplicated-transaction")]
-  DuplicatedTx
+  DuplicatedTx,
+  #[error("invalid-file-operation")]
+  InvalidFileOperation
 }

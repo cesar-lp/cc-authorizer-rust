@@ -1,26 +1,30 @@
-use std::{fs::File, io::{BufReader, BufRead, Error}};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader, Error},
+};
 
-use crate::models::Operation;
+use crate::models::{AccountState, FileOperation, OperationError, OperationExecutor};
 
-pub fn parse_file(filepath: &str) -> Result<Vec<Operation>, Error> {
-    // let file = File::open("create_accounts.txt")?;
+pub fn parse_file(filepath: &str) -> Result<Vec<AccountState>, Error> {
     let file = File::open(filepath)?;
     let reader = BufReader::new(file);
 
-    let mut operations: Vec<Operation> = vec![];
+    let op_executor = OperationExecutor::new();
+
+    let mut results = vec![];
 
     for line in reader.lines() {
         let file_line = line?;
-        let operation: Operation = serde_json::from_str(&file_line).unwrap();
+        let operation: FileOperation = serde_json::from_str(&file_line).unwrap();
 
-        match operation {
-            Operation::Account(acc) => operations.push(Operation::Account(acc)),
-            Operation::Transaction(tx) => operations.push(Operation::Transaction(tx)),
-            _ => {
-                println!("Invalid operation received");
-            }
-        }
+        let result = match operation {
+            FileOperation::CreateAccount(acc) => op_executor.create_account(&acc),
+            FileOperation::ExecuteTX(tx) => op_executor.register_tx(tx),
+            _ => Err(OperationError::InvalidFileOperation),
+        };
+
+        results.push(result.unwrap());
     }
 
-    return Ok(operations);
+    return Ok(results);
 }

@@ -1,5 +1,5 @@
-mod operation;
 mod errors;
+mod operation;
 
-pub use operation::{Operation, OperationResult};
 pub use errors::OperationError;
+pub use operation::{AccountState, FileOperation, OperationExecutor};

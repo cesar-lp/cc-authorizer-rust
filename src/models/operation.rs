@@ -2,8 +2,10 @@ use std::vec;
 
 use serde::{Deserialize, Serialize};
 
+use super::OperationError;
+
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Tx {
+pub struct TX {
     merchant: String,
     amount: u32,
     time: String,
@@ -11,9 +13,9 @@ pub struct Tx {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum Operation {
-    Account(Account),
-    Transaction(Tx),
+pub enum FileOperation {
+    CreateAccount(Account),
+    ExecuteTX(TX),
     Invalid,
 }
 
@@ -23,7 +25,7 @@ pub struct Account {
     available_limit: u32,
     active_card: bool,
     #[serde(skip)]
-    txs: Vec<Tx>,
+    txs: Vec<TX>,
 }
 
 impl Account {
@@ -35,17 +37,17 @@ impl Account {
         }
     }
 
-    pub fn execute_tx(&mut self, tx: Tx) {}
+    pub fn execute_tx(&mut self, tx: TX) {}
 }
 
 #[derive(Debug)]
-pub struct AccountResult {
+pub struct AccountState {
     active_card: bool,
     available_limit: u32,
     violations: Vec<String>,
 }
 
-impl AccountResult {
+impl AccountState {
     pub fn new(acc: &Account) -> Self {
         Self {
             available_limit: acc.available_limit,
@@ -56,14 +58,27 @@ impl AccountResult {
 }
 
 #[derive(Debug)]
-pub struct OperationResult {
-    account: AccountResult
+pub struct OperationExecutor<'a> {
+    account: Option<&'a Account>,
 }
 
-impl OperationResult {
-  pub fn new(account: &Account) -> Self {
-    Self {
-      account: AccountResult::new(account)
+impl <'a> OperationExecutor<'a> {
+    pub fn new() -> Self {
+        Self {
+            account: Option::None,
+        }
     }
-  }
+
+    pub fn create_account(&mut self, account: &'a Account) -> Result<AccountState, OperationError> {
+        if self.account.is_some() {
+            return Err(OperationError::AccountAlreadyInitialized);
+        } else {
+            self.account = Option::Some(account);
+            Ok(AccountState::new(&account))
+        }
+    }
+
+    pub fn register_tx(mut self, tx: TX) -> Result<AccountState, OperationError> {
+        todo!()
+    }
 }

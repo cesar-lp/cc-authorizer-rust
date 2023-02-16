@@ -1,11 +1,10 @@
 use std::io;
 
-mod services;
 mod models;
+mod services;
 
 fn main() -> io::Result<()> {
-    let file_contents = services::parse_file("create_accounts.txt")?;
-    let results = services::validate_operation(file_contents);
+    let results = services::parse_file("create_accounts.txt")?;
 
     for result in results.iter() {
         println!("{:?}", result);
