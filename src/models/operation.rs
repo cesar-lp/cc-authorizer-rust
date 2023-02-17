@@ -39,7 +39,9 @@ impl Account {
         }
     }
 
-    pub fn execute_tx(&mut self, tx: TX) {}
+    pub fn execute_tx(&mut self, tx: TX) {
+      self.available_limit -= tx.amount;
+    }
 
     pub fn to_invalid_state(&self, errors: Vec<OperationError>) -> AccountState {
         AccountState::new(self.active_card, self.available_limit, errors)
@@ -63,6 +65,14 @@ impl AccountState {
             available_limit,
             active_card,
             violations: errors.iter().map(|e| e.to_string()).collect(),
+        }
+    }
+
+    pub fn not_initialized() -> Self {
+        Self {
+            available_limit: 0,
+            active_card: false,
+            violations: vec![],
         }
     }
 }
@@ -92,6 +102,16 @@ impl OperationExecutor {
     }
 
     pub fn register_tx(&mut self, tx: TX) -> AccountState {
-        todo!()
+        if self.account.is_none() {
+            return AccountState::not_initialized();
+        }
+
+        let account = self.account.as_mut().unwrap();
+
+        account.execute_tx(tx);
+
+        let state = account.to_state();
+
+        return state;
     }
 }
