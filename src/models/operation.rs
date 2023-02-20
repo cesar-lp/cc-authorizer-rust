@@ -1,5 +1,6 @@
-use std::{fmt::Debug, vec};
+use std::{fmt::Debug, ops::Sub, vec};
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use super::OperationError;
@@ -8,7 +9,7 @@ use super::OperationError;
 pub struct TX {
     merchant: String,
     amount: u32,
-    time: String,
+    time: DateTime<Utc>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -39,8 +40,38 @@ impl Account {
         }
     }
 
-    pub fn execute_tx(&mut self, tx: TX) {
+    pub fn execute_tx(&mut self, tx: TX) -> Result<AccountState, Vec<OperationError>> {
+        let mut errors = vec![];
+
+        let txs_amount = self.txs.len();
+
+        if self.available_limit < tx.amount {
+            errors.push(OperationError::InsufficientLimit);
+        }
+
+        if txs_amount >= 3 {
+            let origin = self.txs.get(txs_amount - 3).unwrap();
+            let end = self.txs.get(txs_amount - 1).unwrap();
+
+            if tx.time.sub(end.time).num_minutes() <= 2
+                && end.time.sub(origin.time).num_minutes() <= 2
+            {
+                errors.push(OperationError::HighFrequencySmallInterval);
+            }
+        }
+
+        if !errors.is_empty() {
+            return Err(errors);
+        }
+
         self.available_limit -= tx.amount;
+        self.txs.push(tx);
+
+        Ok(AccountState::new(
+            self.active_card,
+            self.available_limit,
+            vec![],
+        ))
     }
 
     pub fn to_invalid_state(&self, errors: Vec<OperationError>) -> AccountState {
@@ -79,15 +110,8 @@ impl AccountState {
     pub fn inactive(available_limit: u32) -> Self {
         AccountState::new(false, available_limit, vec![OperationError::InactiveCard])
     }
-
-    pub fn insufficient_limit(available_limit: u32) -> Self {
-        AccountState::new(
-            true,
-            available_limit,
-            vec![OperationError::InsufficientLimit],
-        )
-    }
 }
+
 #[derive(Debug)]
 pub struct OperationExecutor {
     account: Option<Account>,
@@ -123,14 +147,11 @@ impl OperationExecutor {
             return AccountState::inactive(account.available_limit);
         }
 
-        if account.available_limit < tx.amount {
-            return AccountState::insufficient_limit(account.available_limit);
+        let result = account.execute_tx(tx);
+
+        match result {
+            Ok(account_state) => account_state,
+            Err(errors) => AccountState::new(account.active_card, account.available_limit, errors),
         }
-
-        account.execute_tx(tx);
-
-        let state = account.to_state();
-
-        return state;
     }
 }
