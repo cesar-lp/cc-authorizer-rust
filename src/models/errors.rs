@@ -9,7 +9,7 @@ pub enum OperationError {
     #[error("inactive-card")]
     InactiveCard,
     #[error("insufficient-limit")]
-    InsufficientLimitError,
+    InsufficientLimit,
     #[error("high-frequency-small-interval")]
     HighFrequencySmallInterval,
     #[error("duplicated-transaction")]

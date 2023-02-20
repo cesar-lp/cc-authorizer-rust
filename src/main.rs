@@ -4,7 +4,7 @@ mod models;
 mod services;
 
 fn main() -> io::Result<()> {
-    let results = services::parse_file("inactive_card.txt")?;
+    let results = services::parse_file("insufficient_limit.txt")?;
 
     for result in results.iter() {
         println!("{:?}", result);

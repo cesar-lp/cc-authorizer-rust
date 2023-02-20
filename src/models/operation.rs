@@ -79,8 +79,15 @@ impl AccountState {
     pub fn inactive(available_limit: u32) -> Self {
         AccountState::new(false, available_limit, vec![OperationError::InactiveCard])
     }
-}
 
+    pub fn insufficient_limit(available_limit: u32) -> Self {
+        AccountState::new(
+            true,
+            available_limit,
+            vec![OperationError::InsufficientLimit],
+        )
+    }
+}
 #[derive(Debug)]
 pub struct OperationExecutor {
     account: Option<Account>,
@@ -114,6 +121,10 @@ impl OperationExecutor {
 
         if account.is_inactive() {
             return AccountState::inactive(account.available_limit);
+        }
+
+        if account.available_limit < tx.amount {
+            return AccountState::insufficient_limit(account.available_limit);
         }
 
         account.execute_tx(tx);
