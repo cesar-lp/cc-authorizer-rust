@@ -40,7 +40,7 @@ impl Account {
     }
 
     pub fn execute_tx(&mut self, tx: TX) {
-      self.available_limit -= tx.amount;
+        self.available_limit -= tx.amount;
     }
 
     pub fn to_invalid_state(&self, errors: Vec<OperationError>) -> AccountState {
@@ -69,11 +69,7 @@ impl AccountState {
     }
 
     pub fn not_initialized() -> Self {
-        Self {
-            available_limit: 0,
-            active_card: false,
-            violations: vec![],
-        }
+        AccountState::new(false, 0, vec![OperationError::AccountNotInitialized])
     }
 }
 

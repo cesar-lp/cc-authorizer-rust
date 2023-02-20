@@ -4,6 +4,8 @@ use thiserror::Error;
 pub enum OperationError {
     #[error("account-already-initialized")]
     AccountAlreadyInitialized,
+    #[error("account-not-initialized")]
+    AccountNotInitialized,
     #[error("inactive-card")]
     InactiveCard,
     #[error("insufficient-limit")]
