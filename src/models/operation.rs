@@ -60,6 +60,10 @@ impl Account {
             }
         }
 
+        if (self.includes_tx(&tx)) {
+            errors.push(OperationError::DuplicatedTx);
+        }
+
         if !errors.is_empty() {
             return Err(errors);
         }
@@ -72,6 +76,12 @@ impl Account {
             self.available_limit,
             vec![],
         ))
+    }
+
+    fn includes_tx(&self, tx: &TX) -> bool {
+        self.txs
+            .iter()
+            .any(|t| t.amount == tx.amount && t.merchant == tx.merchant)
     }
 
     pub fn to_invalid_state(&self, errors: Vec<OperationError>) -> AccountState {
