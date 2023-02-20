@@ -1,4 +1,3 @@
-use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
 use crate::account::errors::OperationError;
@@ -8,7 +7,7 @@ pub trait AccountRule: Debug {
     fn validate(&self, account: &Account, tx: &TX) -> Option<OperationError>;
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
 pub struct DuplicatedTx {}
 
 impl AccountRule for DuplicatedTx {
@@ -26,7 +25,7 @@ impl AccountRule for DuplicatedTx {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
 pub struct InsufficientLimit {}
 
 impl AccountRule for InsufficientLimit {
@@ -39,7 +38,7 @@ impl AccountRule for InsufficientLimit {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
 pub struct HighFrequencySmallInterval {}
 
 impl AccountRule for HighFrequencySmallInterval {
