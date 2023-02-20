@@ -3,13 +3,14 @@ use std::{
     io::{BufRead, BufReader, Error},
 };
 
-use crate::models::{AccountState, FileOperation, OperationExecutor};
+use crate::account::{AccountState, Authorizer};
+use crate::io::FileOperation;
 
 pub fn parse_file(filepath: &str) -> Result<Vec<AccountState>, Error> {
     let file = File::open(filepath)?;
     let reader = BufReader::new(file);
 
-    let mut op_executor = OperationExecutor::new();
+    let mut op_executor = Authorizer::new();
     let mut account_states = vec![];
 
     for line in reader.lines() {
@@ -18,8 +19,8 @@ pub fn parse_file(filepath: &str) -> Result<Vec<AccountState>, Error> {
         let operation: FileOperation = serde_json::from_str(&file_line).unwrap();
 
         let account_state = match operation {
-            FileOperation::CreateAccount(acc) => op_executor.create_account(acc),
-            FileOperation::ExecuteTX(tx) => op_executor.register_tx(tx),
+            FileOperation::CreateAccount(acc) => op_executor.create_account(acc.to_account()),
+            FileOperation::ExecuteTX(tx) => op_executor.register_tx(tx.to_tx()),
             _ => panic!("An invalid operation was found in file to be parsed"),
         };
 

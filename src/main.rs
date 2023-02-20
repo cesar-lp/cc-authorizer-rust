@@ -1,10 +1,8 @@
-use std::io;
+mod account;
+mod io;
 
-mod models;
-mod services;
-
-fn main() -> io::Result<()> {
-    let results = services::parse_file("duplicated_transaction.txt")?;
+fn main() -> std::io::Result<()> {
+    let results = io::parse_file("multiple_violations.txt")?;
 
     for result in results.iter() {
         println!("{:?}", result);
