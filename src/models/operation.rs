@@ -50,6 +50,10 @@ impl Account {
     pub fn to_state(&self) -> AccountState {
         AccountState::new(self.active_card, self.available_limit, vec![])
     }
+
+    pub fn is_inactive(&self) -> bool {
+        !self.active_card
+    }
 }
 
 #[derive(Debug)]
@@ -70,6 +74,10 @@ impl AccountState {
 
     pub fn not_initialized() -> Self {
         AccountState::new(false, 0, vec![OperationError::AccountNotInitialized])
+    }
+
+    pub fn inactive(available_limit: u32) -> Self {
+        AccountState::new(false, available_limit, vec![OperationError::InactiveCard])
     }
 }
 
@@ -103,6 +111,10 @@ impl OperationExecutor {
         }
 
         let account = self.account.as_mut().unwrap();
+
+        if account.is_inactive() {
+            return AccountState::inactive(account.available_limit);
+        }
 
         account.execute_tx(tx);
 

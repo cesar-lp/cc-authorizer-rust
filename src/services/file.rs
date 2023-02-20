@@ -20,7 +20,7 @@ pub fn parse_file(filepath: &str) -> Result<Vec<AccountState>, Error> {
         let account_state = match operation {
             FileOperation::CreateAccount(acc) => op_executor.create_account(acc),
             FileOperation::ExecuteTX(tx) => op_executor.register_tx(tx),
-            _=> panic!("An invalid operation was found in file to be parsed")
+            _ => panic!("An invalid operation was found in file to be parsed"),
         };
 
         account_states.push(account_state);
