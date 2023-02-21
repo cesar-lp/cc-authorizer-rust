@@ -10,6 +10,12 @@ pub trait AccountRule: Debug {
 #[derive(Debug)]
 pub struct DuplicatedTx {}
 
+impl DuplicatedTx {
+    pub fn boxed() -> Box<Self> {
+        Box::new(Self {})
+    }
+}
+
 impl AccountRule for DuplicatedTx {
     fn validate(&self, account: &Account, tx: &TX) -> Option<OperationError> {
         let duplicated_tx = account
@@ -28,6 +34,12 @@ impl AccountRule for DuplicatedTx {
 #[derive(Debug)]
 pub struct InsufficientLimit {}
 
+impl InsufficientLimit {
+    pub fn boxed() -> Box<Self> {
+        Box::new(Self {})
+    }
+}
+
 impl AccountRule for InsufficientLimit {
     fn validate(&self, account: &Account, tx: &TX) -> Option<OperationError> {
         if account.available_limit < tx.amount {
@@ -40,6 +52,12 @@ impl AccountRule for InsufficientLimit {
 
 #[derive(Debug)]
 pub struct HighFrequencySmallInterval {}
+
+impl HighFrequencySmallInterval {
+    pub fn boxed() -> Box<Self> {
+        Box::new(Self {})
+    }
+}
 
 impl AccountRule for HighFrequencySmallInterval {
     fn validate(&self, account: &Account, tx: &TX) -> Option<OperationError> {

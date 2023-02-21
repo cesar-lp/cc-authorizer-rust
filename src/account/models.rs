@@ -49,9 +49,9 @@ impl Account {
             active_card,
             txs,
             rules: vec![
-                Box::new(InsufficientLimit {}),
-                Box::new(HighFrequencySmallInterval {}),
-                Box::new(DuplicatedTx {}),
+                InsufficientLimit::boxed(),
+                HighFrequencySmallInterval::boxed(),
+                DuplicatedTx::boxed(),
             ],
         }
     }
