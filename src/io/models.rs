@@ -22,7 +22,7 @@ pub struct AccountData {
 
 impl AccountData {
     pub fn to_account(self) -> Account {
-        Account::new(self.available_limit, self.active_card)
+        Account::new(self.available_limit, self.active_card, vec![])
     }
 }
 

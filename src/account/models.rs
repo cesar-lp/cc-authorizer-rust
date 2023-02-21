@@ -13,8 +13,16 @@ pub struct TX {
 }
 
 impl TX {
-    pub fn min_since(&self, another: &TX) -> i64 {
-        self.time.sub(another.time).num_minutes()
+    pub fn new(amount: u32, merchant: &str, time: DateTime<Utc>) -> Self {
+        Self {
+            amount,
+            merchant: merchant.to_string(),
+            time,
+        }
+    }
+
+    pub fn seconds_since(&self, another: &TX) -> i64 {
+        self.time.sub(another.time).num_seconds()
     }
 }
 
@@ -27,11 +35,11 @@ pub struct Account {
 }
 
 impl Account {
-    pub fn new(available_limit: u32, active_card: bool) -> Self {
+    pub fn new(available_limit: u32, active_card: bool, txs: Vec<TX>) -> Self {
         Self {
             available_limit,
             active_card,
-            txs: vec![],
+            txs,
             rules: vec![
                 Box::new(InsufficientLimit {}),
                 Box::new(HighFrequencySmallInterval {}),
