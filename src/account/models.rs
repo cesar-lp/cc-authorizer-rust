@@ -5,7 +5,7 @@ use crate::account::{
     AccountRule, DuplicatedTx, HighFrequencySmallInterval, InsufficientLimit, OperationError,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TX {
     pub merchant: String,
     pub amount: u32,
@@ -32,6 +32,14 @@ pub struct Account {
     pub active_card: bool,
     pub txs: Vec<TX>,
     rules: Vec<Box<dyn AccountRule>>,
+}
+
+impl PartialEq for Account {
+    fn eq(&self, other: &Self) -> bool {
+        self.available_limit == other.available_limit
+            && self.active_card == other.active_card
+            && self.txs == other.txs
+    }
 }
 
 impl Account {

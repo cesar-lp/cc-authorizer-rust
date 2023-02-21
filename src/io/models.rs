@@ -43,3 +43,35 @@ impl TxData {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn account_data_to_account() {
+        let account_data = AccountData {
+            available_limit: 100,
+            active_card: true,
+        };
+        let expected_account = Account::new(100, true, vec![]);
+
+        assert_eq!(account_data.to_account(), expected_account);
+    }
+
+    #[test]
+    fn tx_data_to_tx() {
+        let tx_time = DateTime::parse_from_rfc3339("2019-02-13T11:00:00.000Z")
+            .unwrap()
+            .into();
+
+        let tx_data = TxData {
+            amount: 100,
+            merchant: String::from("Nike"),
+            time: tx_time,
+        };
+        let expected_tx = TX::new(100, "Nike", tx_time);
+
+        assert_eq!(tx_data.to_tx(), expected_tx);
+    }
+}
