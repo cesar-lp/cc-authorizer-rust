@@ -12,8 +12,6 @@ pub enum OperationError {
     InsufficientLimit,
     #[error("high-frequency-small-interval")]
     HighFrequencySmallInterval,
-    #[error("duplicated-transaction")]
+    #[error("duplicated-tx")]
     DuplicatedTx,
-    #[error("invalid-file-operation")]
-    InvalidFileOperation,
 }

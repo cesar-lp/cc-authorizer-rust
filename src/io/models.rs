@@ -10,7 +10,6 @@ pub enum FileOperation {
     CreateAccount(AccountData),
     #[serde(rename = "transaction")]
     ExecuteTX(TxData),
-    Invalid,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -45,11 +44,13 @@ impl TxData {
 }
 
 #[cfg(test)]
-mod tests {
+mod account_data {
     use super::*;
 
+    use pretty_assertions::assert_eq;
+
     #[test]
-    fn account_data_to_account() {
+    fn create_account() {
         let account_data = AccountData {
             available_limit: 100,
             active_card: true,
@@ -58,9 +59,16 @@ mod tests {
 
         assert_eq!(account_data.to_account(), expected_account);
     }
+}
+
+#[cfg(test)]
+mod tx_data {
+    use super::*;
+
+    use pretty_assertions::assert_eq;
 
     #[test]
-    fn tx_data_to_tx() {
+    fn create_tx() {
         let tx_time = DateTime::parse_from_rfc3339("2019-02-13T11:00:00.000Z")
             .unwrap()
             .into();

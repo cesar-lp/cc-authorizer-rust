@@ -45,3 +45,62 @@ impl Authorizer {
         }
     }
 }
+
+#[cfg(test)]
+mod authorizer {
+
+    use chrono::DateTime;
+
+    use super::*;
+
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn create_account() {
+        let mut authorizer = Authorizer::new();
+
+        let state = authorizer.create_account(Account::new(1000, true, vec![]));
+
+        let expected_state = AccountState::new(true, 1000, vec![]);
+
+        assert_eq!(state, expected_state);
+    }
+
+    #[test]
+    fn create_duplicated_account() {
+        let mut authorizer = Authorizer {
+            account: Some(Account::new(1000, true, vec![])),
+        };
+
+        let state = authorizer.create_account(Account::new(1000, true, vec![]));
+
+        let expected_state =
+            AccountState::new(true, 1000, vec![OperationError::AccountAlreadyInitialized]);
+
+        assert_eq!(state, expected_state);
+    }
+
+    #[test]
+    fn execute_tx_on_uninitialized_account() {
+        let mut authorizer = Authorizer::new();
+
+        let state = authorizer.register_tx(TX::new(500, "Merchant X", DateTime::default()));
+
+        let expected_state = AccountState::not_initialized();
+
+        assert_eq!(state, expected_state);
+    }
+
+    #[test]
+    fn execute_tx_on_inactive_account() {
+        let mut authorizer = Authorizer {
+            account: Some(Account::new(1000, false, vec![])),
+        };
+
+        let state = authorizer.register_tx(TX::new(500, "Merchant X", DateTime::default()));
+
+        let expected_state = AccountState::inactive(1000);
+
+        assert_eq!(state, expected_state);
+    }
+}

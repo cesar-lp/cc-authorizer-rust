@@ -76,10 +76,11 @@ impl AccountRule for HighFrequencySmallInterval {
 }
 
 #[cfg(test)]
-mod tests {
-    use chrono::DateTime;
-
+mod validations {
     use super::*;
+
+    use chrono::DateTime;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn insufficient_limit_tx_amount_valid() {
